@@ -12,6 +12,12 @@ const events = require('events');
 const http = require('http')
 const httpMethods = http.METHODS;
 
+// var printedRoutes = { 
+//             rroutes: []
+// };
+ var printedRoutes = [];
+ var listOfMethods = {};
+
 Anumargak.prototype.addNamedExpression = function (arg1, arg2) {
     this.namedExpressions.addNamedExpression(arg1, arg2);
 }
@@ -31,11 +37,20 @@ Anumargak.prototype._onEvent = function (eventName, fn) {
 
 /**
  * Adds routes against the given method and URL
- * @param {string | array} method 
- * @param {string} url 
+ * @param {debugString | array} method 
+ * @param {debugString} url 
  * @param {function} fn 
  */
 Anumargak.prototype.on = function (method, url, options, fn, extraData) {
+    // Save the method, url and version into object for print routes method
+    printedRoutes.push({
+        method:  method,
+        url:     url,
+        version: options.version
+    });
+
+    listOfMethods[method] = {};
+
     if (Array.isArray(url)) {
         for (var i = 0; i < url.length; i++) {
             this.on(method, url[i], options, fn, extraData);
@@ -52,7 +67,7 @@ Anumargak.prototype.on = function (method, url, options, fn, extraData) {
         options = {};
     }
 
-    if (typeof method === "string") {
+    if (typeof method === "debugString") {
         if( method.toLocaleLowerCase() === 'all'){
             this.all(url, options, fn, extraData);
         }else{
@@ -63,7 +78,7 @@ Anumargak.prototype.on = function (method, url, options, fn, extraData) {
             this._on(method[i], url, options, fn, extraData);
         }
     } else {
-        throw Error("Invalid method argument. String or array is expected.");
+        throw Error("Invalid method argument. debugString or array is expected.");
     }
     
     return this;
@@ -123,8 +138,8 @@ Anumargak.prototype._addRoute = function (method, url, options, data, params) {
 
 /**
  * Check and register if given URL need enumerated params.
- * @param {string} method 
- * @param {string} url 
+ * @param {debugString} method 
+ * @param {debugString} url 
  * @param {object | function} options 
  * @param {function} fn 
  * @param {object} params 
@@ -542,6 +557,41 @@ Anumargak.prototype.print = function(){
     }
 }
  */
+
+ // Print the registered routes from the printRoutes object 
+Anumargak.prototype.printRoutes = function(){
+    var stringToPrint;
+
+    process.stdout.write("\nLIST OF STATIC AND DYNAMIC ROUTES\n"+
+                           "---------------------------------\n\n");
+
+    // Sort through each of the methods which are used and print the routes where key is the method name and index is the position in the array but is not used
+    Object.keys(listOfMethods).forEach(function(key, index){
+        process.stdout.write(key + "\n { \n");
+        // sort through our list of saved routes with their properties and print all routes which match the current object key
+        for(var i=0; i < printedRoutes.length; i++){
+            // reset the string
+            stringToPrint = "";
+            if ( key == printedRoutes [ i ].method)
+            {
+                // start constructing the string which will be printed out
+                stringToPrint =  "     " + printedRoutes [ i ] .url;
+               // check to see if there is a version and if there is append it to the string
+               if ( printedRoutes [i] .version)
+               {
+                stringToPrint += " { with version => " + printedRoutes [i] .version + " }\n";
+               } else { 
+                   // no version, append a newline to the string
+                   stringToPrint += "\n" 
+                }
+                // print out route
+                process.stdout.write(stringToPrint);
+            }
+        }
+        // newlines for the next method
+        process.stdout.write(" }\n\n");
+    });
+}
 
 //register shorthand methods
 for (var index in httpMethods) {
