@@ -12,6 +12,10 @@ const events = require('events');
 const http = require('http')
 const httpMethods = http.METHODS;
 
+// These objects are used to print the registered routes to screen
+var listOfRoutes = [];
+var listOfMethods = [];
+
 Anumargak.prototype.addNamedExpression = function (arg1, arg2) {
     this.namedExpressions.addNamedExpression(arg1, arg2);
 }
@@ -25,7 +29,7 @@ Anumargak.prototype._onEvent = function (eventName, fn) {
     }else if(_name === "default"){
         _name = "not found";
     }
-    if( supportedEvents.indexOf(_name) === -1 ) throw Error(`Router: Unsupported event ${eventName}`);
+    if( supportedEvents.indexOf(_name) === -1 ) throw Error(`Router: test casse failure? Unsupported event ${eventName}`);
     this.eventEmitter.on(_name, fn);
 }
 
@@ -36,6 +40,18 @@ Anumargak.prototype._onEvent = function (eventName, fn) {
  * @param {function} fn 
  */
 Anumargak.prototype.on = function (method, url, options, fn, extraData) {
+
+   // Save the method, url and options.version into the listOfRoutes object 
+//    listOfRoutes.push({
+//     method:  method,
+//     url:     url,
+//     version: "tx"//options.version ? console.log("left exists") : console.log("right not exist")
+// });
+
+
+// Save all the methods which we will use to itereate through to print the routes
+// listOfMethods[method]; 
+
     if (Array.isArray(url)) {
         for (var i = 0; i < url.length; i++) {
             this.on(method, url[i], options, fn, extraData);
@@ -65,7 +81,13 @@ Anumargak.prototype.on = function (method, url, options, fn, extraData) {
     } else {
         throw Error("Invalid method argument. String or array is expected.");
     }
-    
+  
+
+    //   if( options.version)
+    // {
+    //     console.log("version exists");
+    // }
+
     return this;
 }
 
@@ -542,6 +564,67 @@ Anumargak.prototype.print = function(){
     }
 }
  */
+
+  /* 
+ *  Print out all registered routes
+ */ 
+Anumargak.prototype.printRoutes = function(){
+
+    // variable which we will print to the screen
+    var stringToPrint;
+
+    // TEST
+    // console.log("kyes are " + Object.keys(this.staticRoutes.GET['/some/route'].verMap.tree.children['1'].children['2'].children ) + " "  );
+    // console.log("kyes are " + Object.keys(this.staticRoutes.GET['/a'].verMap)  );
+if (this.staticRoutes.GET['/a'].verMap)
+{
+    console.log("success it works route /a")
+}
+if (this.staticRoutes.GET['/some/route'].verMap)
+{
+    console.log("success it works some route")
+    console.dir(this.staticRoutes.GET['/some/route'].verMap)
+}
+     // console.dir(this.staticRoutes.GET['/some/route'].verMap.tree.children['1'].children['2'] )
+      console.dir(this.staticRoutes.GET['/a'].verMap )
+// TEST END
+
+    // process.stdout.write("\nLIST OF STATIC AND DYNAMIC ROUTES\n"+
+    //                        "---------------------------------\n\n");
+
+    // // Iterate through each of the methods 
+    // Object.keys(listOfMethods).forEach(function(key, index){
+
+    //     process.stdout.write(key + "\n { \n");
+
+    //     // Iterate through all of the objects which hold the route url's and versions 
+    //     for(var i=0; i < listOfRoutes.length; i++){
+
+    //         // reset the string we use to print to the screen
+    //         stringToPrint = "";
+
+    //         // We will print this object if its method matches the listOfMethods object 
+    //         if ( key == listOfRoutes [ i ] . method)
+    //         {
+    //             // start constructing the string which will be printed out
+    //             stringToPrint =  "     " + listOfRoutes [ i ] .url;
+
+    //             // check to see if there is a version and if there is append it to the string
+    //            if ( listOfRoutes [i] .version)
+    //            {
+    //             stringToPrint += " { with version => " + listOfRoutes [i] .version + " }\n";
+    //            } else { 
+    //                // no version, append a newline to the string
+    //                stringToPrint += "\n" 
+    //             }
+    //             // print out route to screen
+    //             process.stdout.write(stringToPrint);
+    //         }
+    //     }
+    //     // newlines for the next method
+    //     process.stdout.write(" }\n\n");
+    // });
+}
 
 //register shorthand methods
 for (var index in httpMethods) {
